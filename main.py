@@ -1,24 +1,28 @@
 import pygame
 import sys
 import random
-from itertools import cycle 
- 
+from itertools import cycle
+
 # Constants
 SCREEN_WIDTH = 325
-SCREEN_HEIGHT = 650
+SCREEN_HEIGHT = 600
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+
 def draw_floor():
-    screen.blit(floor_surf, (floor_x,floor_height))
-    screen.blit(floor_surf, (floor_x + SCREEN_WIDTH ,floor_height))
+    screen.blit(floor_surf, (floor_x, floor_height))
+    screen.blit(floor_surf, (floor_x + SCREEN_WIDTH, floor_height))
+
 
 def get_pipe():
     random_pipe_pos = random.choice(pipe_heights)
-    top_pipe = pipe_surf.get_rect(midbottom=(SCREEN_WIDTH, random_pipe_pos-200))
+    top_pipe = pipe_surf.get_rect(
+        midbottom=(SCREEN_WIDTH, random_pipe_pos - 200))
     bot_pipe = pipe_surf.get_rect(midtop=(SCREEN_WIDTH, random_pipe_pos))
     return top_pipe, bot_pipe
+
 
 def move_pipes(pipe_list):
     for pipe in pipe_list:
@@ -27,44 +31,53 @@ def move_pipes(pipe_list):
             pipe_list.remove(pipe)
     return pipe_list
 
+
 def draw_pipes(pipe_list):
     for pipe in pipe_list:
-        if pipe.bottom >= SCREEN_HEIGHT/2:
+        if pipe.bottom > SCREEN_HEIGHT / 2:
             screen.blit(pipe_surf, pipe)
         else:
             flip_pipe = pygame.transform.flip(pipe_surf, False, True)
             screen.blit(flip_pipe, pipe)
 
+
 def rotate_bird(bird):
-    return pygame.transform.rotozoom(bird, -bird_movement *3, 1)
+    return pygame.transform.rotozoom(bird, -bird_movement * 3, 1)
+
 
 def animate_bird():
     new_bird = next(bird_cycle)
-    new_bird_rect = new_bird.get_rect(center = (bird_x,bird_rect.centery))
+    new_bird_rect = new_bird.get_rect(center=(bird_x, bird_rect.centery))
     return new_bird, new_bird_rect
+
 
 def check_collision(pipe_list):
     global can_score
     for pipe in pipe_list:
         if bird_rect.colliderect(pipe):
             can_score = True
+            death_sound.play()
             return False
-    
+
     if bird_rect.top <= 0 or bird_rect.bottom >= floor_height:
         can_score = True
+        death_sound.play()
         return False
 
     return True
+
 
 def update_score():
     global score, can_score
     if pipe_list:
         for pipe in pipe_list:
-            if bird_x -5 < pipe.centerx < bird_x +5 and can_score:
+            if bird_x - 5 < pipe.centerx < bird_x + 5 and can_score:
                 score += 1
-                can_score = False 
+                score_sound.play()
+                can_score = False
             if pipe.centerx < 0:
                 can_score = True
+
 
 def get_highscore(score, high_score):
     if score > high_score:
@@ -72,29 +85,31 @@ def get_highscore(score, high_score):
 
     return high_score
 
+
 def display_score():
     if active:
         score_surf = game_font.render(str(score), True, WHITE)
-        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, 50))
+        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH / 2, 50))
         screen.blit(score_surf, score_rect)
     else:
         score_surf = game_font.render(f'Score: {score}', True, WHITE)
-        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, 50))
+        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH / 2, 50))
         screen.blit(score_surf, score_rect)
 
-        new_hscore = get_highscore(score, high_score)
-        hscore_surf = game_font.render(f'High Score: {new_hscore}', True, BLACK)
-        hscore_rect = hscore_surf.get_rect(center=(SCREEN_WIDTH/2, 600))
+        hscore_surf = game_font.render(f'High Score: {high_score}', True, BLACK)
+        hscore_rect = hscore_surf.get_rect(center=(SCREEN_WIDTH / 2, floor_height-25))
         screen.blit(hscore_surf, hscore_rect)
+
 
 def reset():
     active = True
     pipe_list.clear()
     bird_movement = 0
-    bird_rect.center = (bird_x, SCREEN_HEIGHT/2)
+    bird_rect.center = (bird_x, SCREEN_HEIGHT / 2)
     score = 0
-    can_score =True
-    
+    can_score = True
+
+
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -113,7 +128,7 @@ bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 floor_surf = pygame.image.load('assets/base.png').convert()
 floor_x = 0
-floor_height = 550
+floor_height = 500
 
 BIRD_FLAP = pygame.USEREVENT + 1
 pygame.time.set_timer(BIRD_FLAP, 300)
@@ -123,17 +138,22 @@ bird_down = pygame.image.load('assets/yellowbird-downflap.png').convert_alpha()
 bird_cycle = cycle([bird_up, bird_mid, bird_down])
 bird_surf = next(bird_cycle)
 bird_x = 50
-bird_rect = bird_surf.get_rect(center=(bird_x, SCREEN_HEIGHT/2))
-
+bird_rect = bird_surf.get_rect(center=(bird_x, SCREEN_HEIGHT / 3))
 
 SPAWN_PIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWN_PIPE, 1800)
 pipe_surf = pygame.image.load('assets/pipe-green.png').convert()
-pipe_list =[]
-pipe_heights = [300, 400, 500]
+pipe_list = []
+pipe_heights = [250, 350, 450]
 
+game_over_surf = pygame.image.load('assets/message.png').convert_alpha()
+game_over_rect = game_over_surf.get_rect(center = (SCREEN_WIDTH/2,SCREEN_HEIGHT/2))
 
-while True: 
+flap_sound = pygame.mixer.Sound('sound/sfx_wing.wav')
+death_sound = pygame.mixer.Sound('sound/sfx_hit.wav')
+score_sound = pygame.mixer.Sound('sound/sfx_point.wav')
+
+while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -147,15 +167,18 @@ while True:
             if event.key == pygame.K_SPACE:
                 if active:
                     bird_movement = 0
-                    bird_movement -= 7 
+                    bird_movement -= 7
+                    flap_sound.play()
+
                 else:
                     active = True
                     pipe_list.clear()
                     bird_movement = 0
-                    bird_rect.center = (bird_x, SCREEN_HEIGHT/2)
+                    bird_rect.center = (bird_x, SCREEN_HEIGHT / 3 )
                     score = 0
+                    can_score = True
 
-    screen.blit(bg, (0,0))
+    screen.blit(bg, (0, 0))
 
     if active:
         bird_movement += gravity
@@ -168,6 +191,10 @@ while True:
 
         active = check_collision(pipe_list)
         update_score()
+
+    else:
+        screen.blit(game_over_surf, game_over_rect)
+        high_score = get_highscore(score, high_score)
 
     floor_x -= 1
     draw_floor()
