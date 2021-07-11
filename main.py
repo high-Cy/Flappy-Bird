@@ -8,6 +8,7 @@ SCREEN_WIDTH = 325
 SCREEN_HEIGHT = 650
 
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 def draw_floor():
     screen.blit(floor_surf, (floor_x,floor_height))
@@ -73,7 +74,7 @@ def get_highscore(score, high_score):
 
 def display_score():
     if active:
-        score_surf = game_font.render(score, True, WHITE)
+        score_surf = game_font.render(str(score), True, WHITE)
         score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, 50))
         screen.blit(score_surf, score_rect)
     else:
@@ -81,7 +82,10 @@ def display_score():
         score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, 50))
         screen.blit(score_surf, score_rect)
 
-        high_score_surf = game_font.render(f'High Score: {high_score}')
+        new_hscore = get_highscore(score, high_score)
+        hscore_surf = game_font.render(f'High Score: {new_hscore}', True, BLACK)
+        hscore_rect = hscore_surf.get_rect(center=(SCREEN_WIDTH/2, 600))
+        screen.blit(hscore_surf, hscore_rect)
 
 def reset():
     active = True
@@ -164,12 +168,13 @@ while True:
 
         active = check_collision(pipe_list)
         update_score()
-        display_score()
 
     floor_x -= 1
     draw_floor()
     if floor_x <= -SCREEN_WIDTH:
         floor_x = 0
+
+    display_score()
 
     pygame.display.update()
     clock.tick(120)
