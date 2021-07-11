@@ -72,9 +72,16 @@ def get_highscore(score, high_score):
     return high_score
 
 def display_score():
-    score_surf = game_font.render(f'Score: {score}', True, WHITE)
-    score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, 50))
-    screen.blit(score_surf, score_rect)
+    if active:
+        score_surf = game_font.render(score, True, WHITE)
+        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, 50))
+        screen.blit(score_surf, score_rect)
+    else:
+        score_surf = game_font.render(f'Score: {score}', True, WHITE)
+        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, 50))
+        screen.blit(score_surf, score_rect)
+
+        high_score_surf = game_font.render(f'High Score: {high_score}')
 
 def reset():
     active = True
@@ -90,7 +97,7 @@ clock = pygame.time.Clock()
 game_font = pygame.font.Font('04B_19.ttf', 32)
 
 # Game Variables
-gravity = 0.25
+gravity = 0.2
 bird_movement = 0
 active = True
 score = 0
@@ -116,7 +123,7 @@ bird_rect = bird_surf.get_rect(center=(bird_x, SCREEN_HEIGHT/2))
 
 
 SPAWN_PIPE = pygame.USEREVENT
-pygame.time.set_timer(SPAWN_PIPE, 1500)
+pygame.time.set_timer(SPAWN_PIPE, 1800)
 pipe_surf = pygame.image.load('assets/pipe-green.png').convert()
 pipe_list =[]
 pipe_heights = [300, 400, 500]
@@ -136,7 +143,7 @@ while True:
             if event.key == pygame.K_SPACE:
                 if active:
                     bird_movement = 0
-                    bird_movement -= 5 
+                    bird_movement -= 7 
                 else:
                     active = True
                     pipe_list.clear()
@@ -165,4 +172,4 @@ while True:
         floor_x = 0
 
     pygame.display.update()
-    clock.tick(60)
+    clock.tick(120)
