@@ -58,6 +58,10 @@ screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
 clock = pygame.time.Clock()
 game_font = pygame.font.Font('04B_19.ttf', 32)
 
+pygame.display.set_caption('Flappy Bird')
+icon = pygame.image.load('assets/yellowbird-midflap.png').convert_alpha()
+pygame.display.set_icon(icon)
+
 # Game Variables
 active = True
 score = 0
@@ -72,9 +76,9 @@ pygame.time.set_timer(BIRD_FLAP, 300)
 SPAWN_PIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWN_PIPE, 1800)
 
-flap_sound = pygame.mixer.Sound('sound/sfx_wing.wav')
-death_sound = pygame.mixer.Sound('sound/sfx_hit.wav')
-score_sound = pygame.mixer.Sound('sound/sfx_point.wav')
+flap_sound = pygame.mixer.Sound('sounds/sfx_wing.wav')
+death_sound = pygame.mixer.Sound('sounds/sfx_hit.wav')
+score_sound = pygame.mixer.Sound('sounds/sfx_point.wav')
 
 while True:
     for event in pygame.event.get():
